@@ -33,6 +33,18 @@ const upload = multer({ dest: 'uploads/' });
 
 const port = 8000;
 
+// Qdrant connection config (works for both local Docker and Qdrant Cloud)
+const qdrantConfig = {
+    url: process.env.QDRANT_URL || "http://localhost:6333",
+    ...(process.env.QDRANT_API_KEY && {
+        clientConfig: {
+            api_key: process.env.QDRANT_API_KEY,
+        },
+    }),
+};
+
+console.log(`📦 Qdrant target: ${qdrantConfig.url}`);
+
 // Helper: retry with exponential backoff for rate limits
 async function retryWithBackoff(fn, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
@@ -82,9 +94,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
         console.log(`📄 Processing "${req.file.originalname}" — ${splits.length} chunks`);
         
-        // Store embeddings in Qdrant (Docker)
+        // Store embeddings in Qdrant
         await QdrantVectorStore.fromDocuments(splits, embeddings, {
-            url: process.env.QDRANT_URL || "http://localhost:6333",
+            ...qdrantConfig,
             collectionName: documentId,
         });
         
@@ -112,7 +124,7 @@ app.post('/chat', async (req, res) => {
         });
 
         const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
-            url: process.env.QDRANT_URL || "http://localhost:6333",
+            ...qdrantConfig,
             collectionName: document_id,
         });
 
