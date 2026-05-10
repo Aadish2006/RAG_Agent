@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { UploadCloud, MessageSquare, Send, FileText, Loader2, File } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function App() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +37,7 @@ function App() {
 
     try {
       // Assuming backend is running on localhost:8000
-      const response = await axios.post('http://localhost:8000/upload', formData, {
+      const response = await axios.post(`${API_BASE}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -61,7 +63,7 @@ function App() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/chat', {
+      const response = await axios.post(`${API_BASE}/chat`, {
         document_id: documentId,
         message: userMessage,
       });
