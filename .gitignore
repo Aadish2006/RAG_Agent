@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend-node/node_modules/
+
+# Environment variables (API KEYS - NEVER COMMIT)
+.env
+.env.local
+.env.production
+
+# Uploads and generated data
+backend-node/uploads/
+backend-node/local_index/
+qdrant_storage/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
