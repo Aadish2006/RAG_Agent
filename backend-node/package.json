@@ -19,12 +19,14 @@
     "@langchain/qdrant": "^1.0.2",
     "@langchain/textsplitters": "^1.0.1",
     "@qdrant/js-client-rest": "^1.17.0",
+    "@xenova/transformers": "^2.17.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "hnswlib-node": "^3.0.0",
     "langchain": "^1.4.0",
     "multer": "^2.1.1",
+    "okapibm25": "^1.4.1",
     "pdf-parse": "^2.4.5",
     "uuid": "^14.0.0"
   }

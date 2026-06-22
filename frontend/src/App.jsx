@@ -63,12 +63,23 @@ function App() {
     setLoading(true);
 
     try {
+      // Get last 5 messages for conversation memory
+      const chatHistory = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .slice(-5)
+        .map(m => ({ role: m.role, content: m.content }));
+
       const response = await axios.post(`${API_BASE}/chat`, {
         document_id: documentId,
         message: userMessage,
+        history: chatHistory,
       });
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: response.data.answer }]);
+      setMessages((prev) => [...prev, { 
+        role: 'assistant', 
+        content: response.data.answer,
+        citations: response.data.citations 
+      }]);
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) => [...prev, { role: 'assistant', content: "Sorry, I encountered an error. Please try again." }]);
@@ -173,12 +184,41 @@ function App() {
             ) : (
               messages.map((msg, index) => (
                 <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 shadow-sm ${
+                  <div className={`max-w-[80%] rounded-2xl px-5 py-3.5 shadow-sm relative group/msg ${
                     msg.role === 'user' 
                       ? 'bg-indigo-600 text-white rounded-tr-none' 
                       : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
                   }`}>
                     <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    
+                    {msg.role === 'assistant' && msg.citations && msg.citations.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-slate-150 text-slate-700">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Sources Citations:</span>
+                        <div className="flex flex-wrap gap-2">
+                          {Array.from(new Set(msg.citations.map(c => `${c.fileName}-Page ${c.pageNumber}-${c.sectionName}`)))
+                            .map((key, idx) => {
+                              const citation = msg.citations.find(c => `${c.fileName}-Page ${c.pageNumber}-${c.sectionName}` === key);
+                              return (
+                                <div 
+                                  key={idx} 
+                                  className="group/pill relative cursor-help bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 rounded-lg px-2.5 py-1 text-xs text-indigo-700 font-medium transition-all"
+                                >
+                                  📄 {citation.fileName} (p. {citation.pageNumber})
+                                  
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/pill:block z-30 w-72 bg-slate-950 text-white text-xs p-3.5 rounded-xl shadow-xl border border-slate-800 pointer-events-none transition-all">
+                                    <div className="flex flex-col gap-1.5">
+                                      <span className="font-semibold text-indigo-400 text-[11px] uppercase tracking-wide">Section: {citation.sectionName}</span>
+                                      <p className="italic text-slate-200 leading-relaxed font-normal">"{citation.snippet}"</p>
+                                    </div>
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-950"></div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
